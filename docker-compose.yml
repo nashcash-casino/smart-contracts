@@ -1,0 +1,25 @@
+version: '3.6'
+
+services:
+  ganache:
+    build:
+      context: ./ganache
+    container_name: ganache
+    ports:
+      - "7545:7545"
+
+  truffle:
+    build:
+      context: ./truffle
+    container_name: truffle
+    volumes:
+      - ./truffle:/app/truffle
+      - contracts-volume:/app/build/contracts
+    links:
+      - ganache
+    depends_on:
+      - ganache
+    command: ["npm", "run", "migrate", "--", "--reset", "--all"]
+
+volumes:
+  contracts-volume:
