@@ -4,7 +4,6 @@ import "zeppelin-solidity/contracts/lifecycle/Pausable.sol";
 import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 
 
-// TODO: Explore possibility of retiring unclaimed chips
 contract ChipTreasury is Pausable {
   using SafeMath for uint256;
 
