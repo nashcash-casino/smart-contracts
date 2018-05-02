@@ -21,6 +21,7 @@ contract ChipTreasury is Pausable {
   event TokenWithdrawal(address indexed to, address indexed token, uint value);
 
   event ChipMinted(uint indexed chipId);
+  event ChipHashReplaced(uint indexed chipId, bytes32 newHash, bytes32 oldhash);
   event ChipClaimAttempt(address indexed sender, uint indexed chipId);
   event ChipClaimSuccess(address indexed sender, uint indexed chipId);
 
@@ -53,6 +54,25 @@ contract ChipTreasury is Pausable {
     chips[numChipsMinted] = Chip(hash, false);
     emit ChipMinted(numChipsMinted);
     numChipsMinted = numChipsMinted.add(1);
+  }
+
+  // Mint function that allows for transactions to come in out-of-order
+  // However it is unsafe because a mistakenly high chipId could throw off numChipsMinted permanently
+  // NOTE: You must prefix hashes with '0x'
+  function mintChipUnsafely (uint chipId, bytes32 hash) public onlyOwner whenPaused {
+    require(chips[chipId].hash == ""); // chip hash must initially be unset
+    chips[chipId].hash = hash;
+    emit ChipMinted(chipId);
+    numChipsMinted = numChipsMinted.add(1);
+  }
+
+  // In case you mess something up during minting (╯°□°）╯︵ ┻━┻
+  // NOTE: You must prefix hashes with '0x'
+  function replaceChiphash (uint chipId, bytes32 newHash) public onlyOwner whenPaused {
+    require(chips[chipId].hash != ""); // chip hash must not be unset
+    bytes32 oldHash = chips[chipId].hash;
+    chips[chipId].hash = newHash;
+    emit ChipHashReplaced(chipId, newHash, oldHash);
   }
 
   function withdrawFunds (uint value) public onlyOwner {
